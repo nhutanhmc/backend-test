@@ -1,0 +1,32 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches: [ "main" ]  # Mỗi khi push lên nhánh main thì chạy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
+        password: ${{ secrets.DO_PASSWORD }}
+        script: |
+          # 1. Kiem tra xem thu muc code co chua, chua thi clone, roi thi pull
+          if [ ! -d "/root/optibot" ]; then
+            git clone https://github.com/username-cua-ban/daily-sync-bot.git /root/optibot
+          fi
+          
+          cd /root/optibot
+          
+          # 2. Lay code moi nhat ve
+          git pull origin main
+          
+          # 3. Build lai Docker Image
+          docker build -t optibot:v1 .
+          
+          # 4. (Tuy chon) Chay thu 1 phat de check (hoac de Cron tu chay)
+          echo "Build Success! Bot is ready for the next Schedule."
