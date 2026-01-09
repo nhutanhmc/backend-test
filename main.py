@@ -4,9 +4,14 @@ import json
 import hashlib
 import glob
 from dotenv import load_dotenv
+import requests
 
 import scraper
 import ai_manager
+
+# Telegram configuration
+TELEGRAM_TOKEN = "8183629835:AAHrBeapTCIK33pxUBcWLDmlWawZW0vBeIk"
+TELEGRAM_CHAT_ID = "8102277793"
 
 # 1. Load cau hinh (Uu tien bien moi truong tu Docker -e)
 load_dotenv()
@@ -58,8 +63,24 @@ def save_state(state):
     with open(STATE_FILE, "w") as f:
         json.dump(state, f, indent=4)
 
+def send_telegram_message(message):
+    """Gui thong bao qua Telegram."""
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    data = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
+    try:
+        response = requests.post(url, data=data)
+        if response.status_code == 200:
+            print("[SUCCESS] Telegram notification sent.")
+        else:
+            print(f"[WARNING] Failed to send Telegram message: {response.text}")
+    except Exception as e:
+        print(f"[ERROR] Exception sending Telegram message: {e}")
+
 def main():
     print("--- STARTING DAILY JOB (ZERO CONFIG - AUTO MEMORY) ---")
+    
+    # Gui thong bao bat dau qua Telegram
+    send_telegram_message("Daily job started.")
     
     global VECTOR_STORE_ID, ASSISTANT_ID
 
@@ -180,6 +201,10 @@ def main():
     print(f"Updated:       {stats['updated']}")
     print(f"Skipped:       {stats['skipped']}")
     print("========================================")
+
+    # Gui thong bao thanh cong qua Telegram
+    message = f"Daily job completed successfully!\nTotal Scanned: {len(all_files)}\nAdded: {stats['added']}\nDeleted: {stats['deleted']}\nUpdated: {stats['updated']}\nSkipped: {stats['skipped']}"
+    send_telegram_message(message)
 
 if __name__ == "__main__":
     main()

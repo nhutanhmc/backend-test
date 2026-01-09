@@ -7,7 +7,11 @@ from dotenv import load_dotenv
 if not os.getenv('OPENAI_API_KEY'):
     load_dotenv()
 
-client = OpenAI()
+try:
+    client = OpenAI()
+except Exception as e:
+    print(f"[WARNING] OpenAI client not initialized: {e}")
+    client = None
 
 DATA_DIR = "data"
 VECTOR_STORE_NAME = "OptiSigns Knowledge Base"
@@ -18,6 +22,10 @@ def setup_ai_backend():
     Khoi tao Vector Store va Assistant (Rong).
     Tra ve ID (Return) de main.py luu vao state.json.
     """
+    if client is None:
+        print("[ERROR] OpenAI client not available.")
+        return None, None
+    
     print("--- STARTING SETUP (SKELETON ONLY) ---")
 
     try:
@@ -44,6 +52,10 @@ def setup_ai_backend():
 
 def delete_old_file_on_openai(file_id):
     """Xoa file cu tren OpenAI dua vao ID."""
+    if client is None:
+        print("[ERROR] OpenAI client not available.")
+        return False
+    
     if not file_id: return
     
     print(f"Deleting old file ID: {file_id} ...")
@@ -57,6 +69,10 @@ def delete_old_file_on_openai(file_id):
 
 def upload_single_file(file_path, vector_store_id):
     """Upload 1 file va tra ve ID."""
+    if client is None:
+        print("[ERROR] OpenAI client not available.")
+        return None
+    
     try:
         # 1. Upload file len Cloud
         with open(file_path, "rb") as f:
