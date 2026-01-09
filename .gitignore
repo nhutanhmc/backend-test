@@ -2,5 +2,9 @@
 venv/
 __pycache__/
 data/
+# Ignore report and misc text files
+*.txt
 memory/
 state.json
+bao_cao_telegram.txt
+code_mapping.txt
