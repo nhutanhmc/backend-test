@@ -21,18 +21,49 @@ git clone https://github.com/your-username/os-mini-clone.git
 cd os-mini-clone
 ```
 
-### Bước 2: Build Docker image
+### Bước 2:
+### ✅ Cách 1: Chạy local (không dùng Docker)
+
+**1) Tạo file `.env`**  
+Tạo file `.env` ở **thư mục gốc** (cùng cấp với `main.py`) và thêm:
+```env
+OPENAI_API_KEY=your_api_key_here
+```
+
+**2) Tạo venv + cài dependencies + chạy**
+
+**Windows (PowerShell)**
+```powershell
+python -m venv venv
+.env\Scripts\Activate.ps1
+pip install -r requirements.txt
+python main.py
+```
+
+> Nếu bị lỗi không cho chạy `Activate.ps1`, chạy lệnh này **1 lần** rồi thử lại:
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+**macOS / Linux**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python main.py
+```
+
+### ✅ Cách 2: Chạy bằng Docker (khuyên dùng)
+
+**Build Docker image**
 ```bash
 docker build -t optibot:v1 .
 ```
-- Lệnh này sẽ tạo image `optibot:v1` từ Dockerfile. Có thể mất vài phút lần đầu.
+- Lệnh này tạo image `optibot:v1` từ Dockerfile (lần đầu có thể mất vài phút).
 
-## ▶️ Chạy
-
-### Lần đầu (Setup)
-Chạy lệnh sau để setup vector store và assistant:
+**Chạy (lần đầu & các lần sau: Setup + Update)**
 ```bash
-docker run --rm -e OPENAI_API_KEY="your_api_key_here" -v ${PWD}/memory:/app/memory optibot:v1
+docker run --rm   -e OPENAI_API_KEY="your_api_key_here"   -v ${PWD}/memory:/app/memory   optibot:v1
 ```
 - Thay `your_api_key_here` bằng API key của bạn.
 - `-v ${PWD}/memory:/app/memory`: Mount thư mục `memory` để lưu trạng thái (IDs và file hashes). **Quan trọng**: Không bỏ dòng này, nếu không dữ liệu sẽ mất mỗi lần chạy.
