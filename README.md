@@ -1,46 +1,47 @@
-# OptiBot Auto - AI Assistant for OptiSigns Knowledge Base
+# OptiBot Auto — AI Assistant for the OptiSigns Knowledge Base
 
-OptiBot Auto là một công cụ tự động để scrape dữ liệu từ trang hỗ trợ OptiSigns, upload lên OpenAI Vector Store, và tạo AI Assistant để trả lời câu hỏi dựa trên kiến thức đó. Dự án này giúp bạn có một chatbot thông minh cho OptiSigns mà không cần code nhiều.
+OptiBot Auto is an automation tool that scrapes content from the OptiSigns Support Center, uploads it to an OpenAI Vector Store, and creates an AI Assistant that can answer questions using that knowledge. It helps you build a smart OptiSigns chatbot with minimal coding.
 
-## 🚀 Tính năng chính
-- **Tự động scrape**: Lấy dữ liệu từ API OptiSigns và lưu thành file Markdown.
-- **Upload thông minh**: Chỉ upload file mới hoặc thay đổi, tránh trùng lặp.
-- **AI Assistant**: Tạo bot trên OpenAI để trả lời câu hỏi.
-- **Docker ready**: Chạy dễ dàng với Docker, không cần cài Python trên máy.
-- **Zero config**: Tự động setup vector store và assistant lần đầu.
+## 🚀 Key Features
+- **Automatic scraping**: Fetches articles from the OptiSigns Help Center API and saves them as Markdown files.
+- **Smart uploads**: Uploads only new or changed files to avoid duplicates.
+- **AI Assistant**: Creates an OpenAI Assistant to answer questions based on the uploaded docs.
+- **Docker-ready**: Run easily with Docker—no need to install Python locally.
+- **Zero config**: Automatically sets up the vector store and assistant on the first run.
 
-## 📋 Yêu cầu
-- **Docker**: Phiên bản mới nhất (có thể tải từ [docker.com](https://www.docker.com/)).
-- **OpenAI API Key**: Đăng ký tài khoản OpenAI và lấy API key từ [platform.openai.com](https://platform.openai.com/account/api-keys). Bạn cần có credit để dùng API (khoảng $0.01-0.05 cho mỗi lần chạy).
+## 📋 Requirements
+- **Docker**: Latest version (download from docker.com).
+- **OpenAI API Key**: Create an OpenAI account and generate an API key from the OpenAI platform. You need credits to use the API (roughly $0.01–$0.05 per run, depending on uploads and usage).
 
-## 🛠️ Cài đặt
+## 🛠️ Installation
 
-### Bước 1: Clone repo
+### Step 1: Clone the repo
 ```bash
 git clone https://github.com/your-username/os-mini-clone.git
 cd os-mini-clone
 ```
 
-### Bước 2:
-### ✅ Cách 1: Chạy local (không dùng Docker)
+### Step 2: Run the project
 
-**1) Tạo file `.env`**  
-Tạo file `.env` ở **thư mục gốc** (cùng cấp với `main.py`) và thêm:
+## ✅ Option 1: Run locally (without Docker)
+
+### 1) Create a `.env` file
+Create a `.env` file in the **project root** (same level as `main.py`) and add:
 ```env
 OPENAI_API_KEY=your_api_key_here
 ```
 
-**2) Tạo venv + cài dependencies + chạy**
+### 2) Create a virtual environment, install dependencies, and run
 
 **Windows (PowerShell)**
 ```powershell
 python -m venv venv
-.env\Scripts\Activate.ps1
+.\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python main.py
 ```
 
-> Nếu bị lỗi không cho chạy `Activate.ps1`, chạy lệnh này **1 lần** rồi thử lại:
+If PowerShell blocks `Activate.ps1`, run this once and try again:
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
@@ -53,34 +54,39 @@ pip install -r requirements.txt
 python main.py
 ```
 
-### ✅ Cách 2: Chạy bằng Docker (khuyên dùng)
+## ✅ Option 2: Run with Docker (recommended)
 
-**Build Docker image**
+### Build the Docker image
 ```bash
 docker build -t optibot:v1 .
 ```
-- Lệnh này tạo image `optibot:v1` từ Dockerfile (lần đầu có thể mất vài phút).
+- This builds the image `optibot:v1` from the Dockerfile (first build may take a few minutes).
 
-**Chạy (lần đầu & các lần sau: Setup + Update)**
+### Run (first run and all future runs: setup + update)
 ```bash
-docker run --rm   -e OPENAI_API_KEY="your_api_key_here"   -v ${PWD}/memory:/app/memory   optibot:v1
+docker run --rm \
+  -e OPENAI_API_KEY="your_api_key_here" \
+  -v ${PWD}/memory:/app/memory \
+  optibot:v1
 ```
-- Thay `your_api_key_here` bằng API key của bạn.
-- `-v ${PWD}/memory:/app/memory`: Mount thư mục `memory` để lưu trạng thái (IDs và file hashes). **Quan trọng**: Không bỏ dòng này, nếu không dữ liệu sẽ mất mỗi lần chạy.
 
-### Lần sau (Update)
-Chạy lại lệnh trên để scrape data mới và update assistant. Chỉ file thay đổi mới được upload.
+Notes:
+- Replace `your_api_key_here` with your real API key.
+- `-v ${PWD}/memory:/app/memory` mounts the `memory` folder to persist state (IDs + file hashes). **Do not remove this**, otherwise you will lose state on each run.
 
-## 📊 Output mẫu
-Khi chạy, bạn sẽ thấy:
+### Next runs (update)
+Run the same command again to scrape new data and update the assistant. Only changed files will be uploaded.
+
+## 📊 Sample Output
+When you run the script, you should see something like:
 ```
 --- STARTING DAILY JOB (ZERO CONFIG - AUTO MEMORY) ---
 [INFO] No IDs found. Setting up new resources...
 [SUCCESS] Setup Done. IDs saved to memory/state.json
 
 --- STEP 1: SCRAPING DATA ---
---- Đang kết nối API: https://support.optisigns.com/api/v2/help_center/articles.json?per_page=30 ---
-✅ Tìm thấy 30 bài viết. Bắt đầu xử lý...
+--- Connecting to API: https://support.optisigns.com/api/v2/help_center/articles.json?per_page=30 ---
+✅ Found 30 articles. Processing...
 
 --- STEP 2: PROCESSING FILES ---
 [NEW] Found new file: article1.md
@@ -98,41 +104,47 @@ Skipped:       0
 
 ## 🛠️ Troubleshooting
 
-### Lỗi "OPENAI_API_KEY not found"
-- Đảm bảo bạn đã set `-e OPENAI_API_KEY="sk-..."` đúng.
+### Error: `OPENAI_API_KEY not found`
+- Make sure you passed `-e OPENAI_API_KEY="sk-..."` correctly (Docker) or set it in `.env` (local).
 
-### Lỗi "Beta object has no attribute"
-- Rebuild image: `docker build -t optibot:v1 .`
+### Error: `Beta object has no attribute`
+- Rebuild the image:
+  ```bash
+  docker build -t optibot:v1 .
+  ```
 
-### Không có data trong memory/
-- Đảm bảo mount volume đúng: `-v ${PWD}/memory:/app/memory`
+### `memory/` is empty or not persistent
+- Make sure the volume mount is correct:
+  ```bash
+  -v ${PWD}/memory:/app/memory
+  ```
 
-### Tốn phí OpenAI
-- Mỗi lần chạy upload file mới sẽ tốn phí. Nếu chạy nhiều, monitor usage trên OpenAI dashboard.
+### OpenAI costs
+- Uploading new/changed files costs money. If you run often, monitor usage in your OpenAI dashboard.
 
-### File data/ trống
-- Script tự động scrape từ OptiSigns API. Nếu API thay đổi, có thể cần update code.
+### `data/` folder is empty
+- The script scrapes from the OptiSigns API. If the API changes, the code may need updates.
 
-## 📁 Cấu trúc project
-```
+## 📁 Project Structure
+```text
 os-mini-clone/
-├── ai_manager.py      # Quản lý OpenAI (vector store, assistant)
-├── main.py            # Script chính (scrape + upload)
-├── scraper.py         # Scrape data từ OptiSigns
-├── data/              # Thư mục lưu file Markdown (tự động tạo)
-├── memory/            # Thư mục lưu state (tạo sau lần đầu)
+├── ai_manager.py      # OpenAI manager (vector store, assistant)
+├── main.py            # Main script (scrape + upload)
+├── scraper.py         # Scraper for OptiSigns
+├── data/              # Stores Markdown files (auto-created)
+├── memory/            # Stores state (created after first run)
 ├── Dockerfile         # Docker setup
 ├── requirements.txt   # Python dependencies
-├── .dockerignore      # Ignore files khi build Docker
-└── README.md          # File này
+├── .dockerignore      # Ignore files during Docker build
+└── README.md          # This file
 ```
 
-## 🤝 Đóng góp
-Nếu bạn muốn cải tiến, fork repo và tạo PR. Issues welcome!
+## 🤝 Contributing
+Want to improve it? Fork the repo and open a PR. Issues are welcome!
 
 ## 📄 License
-MIT License. Sử dụng tự do, nhưng nhớ credit nếu share.
+MIT License. Free to use—please include credit if you share.
 
 ---
 
-**Lưu ý**: Đây là project demo. Không dùng cho production mà không test kỹ. OpenAI API có giới hạn rate, nên không chạy quá 1 lần/phút.
+**Note**: This is a demo project. Don’t use it in production without thorough testing. The OpenAI API has rate limits—avoid running more than once per minute.
