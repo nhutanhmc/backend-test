@@ -28,7 +28,7 @@ def setup_ai_backend():
         # 2. Tao Assistant
         assistant = client.beta.assistants.create(
             name=ASSISTANT_NAME,
-            instructions=instructions=(
+            instructions=(
                 "You are OptiBot, the customer-support bot for OptiSigns.com.\n"
                 "• Tone: helpful, factual, concise.\n"
                 "• Only answer using the uploaded docs.\n"
