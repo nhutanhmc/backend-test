@@ -7,11 +7,7 @@ from dotenv import load_dotenv
 if not os.getenv('OPENAI_API_KEY'):
     load_dotenv()
 
-try:
-    client = OpenAI()
-except Exception as e:
-    print(f"[WARNING] OpenAI client not initialized: {e}")
-    client = None
+client = OpenAI()
 
 DATA_DIR = "data"
 VECTOR_STORE_NAME = "OptiSigns Knowledge Base"
@@ -22,10 +18,6 @@ def setup_ai_backend():
     Khoi tao Vector Store va Assistant (Rong).
     Tra ve ID (Return) de main.py luu vao state.json.
     """
-    if client is None:
-        print("[ERROR] OpenAI client not available. Cannot run setup.")
-        return None, None
-
     print("--- STARTING SETUP (SKELETON ONLY) ---")
 
     try:
@@ -36,7 +28,13 @@ def setup_ai_backend():
         # 2. Tao Assistant
         assistant = client.beta.assistants.create(
             name=ASSISTANT_NAME,
-            instructions="You are OptiBot. Answer based on uploaded files.",
+            instructions=instructions=(
+                "You are OptiBot, the customer-support bot for OptiSigns.com.\n"
+                "• Tone: helpful, factual, concise.\n"
+                "• Only answer using the uploaded docs.\n"
+                "• Max 5 bullet points; else link to the doc.\n"
+                '• Cite up to 3 "Article URL:" lines per reply.'
+            ),
             model="gpt-4o-mini", 
             tools=[{"type": "file_search"}],
             tool_resources={"file_search": {"vector_store_ids": [vector_store.id]}}
@@ -52,12 +50,8 @@ def setup_ai_backend():
 
 def delete_old_file_on_openai(file_id):
     """Xoa file cu tren OpenAI dua vao ID."""
-    if client is None:
-        print("[ERROR] OpenAI client not available.")
-        return False
-    if not file_id:
-        return False
-
+    if not file_id: return
+    
     print(f"Deleting old file ID: {file_id} ...")
     try:
         client.files.delete(file_id)
@@ -69,10 +63,6 @@ def delete_old_file_on_openai(file_id):
 
 def upload_single_file(file_path, vector_store_id):
     """Upload 1 file va tra ve ID."""
-    if client is None:
-        print("[ERROR] OpenAI client not available.")
-        return None
-
     try:
         # 1. Upload file len Cloud
         with open(file_path, "rb") as f:
@@ -93,9 +83,6 @@ def upload_single_file(file_path, vector_store_id):
 
 def delete_resources():
     print("\n--- DELETING ALL RESOURCES ---")
-    if client is None:
-        print("[ERROR] OpenAI client not available. Nothing to delete.")
-        return
     
     # Do logic moi luu vao state, nen ham xoa nay chi tham khao .env
     # (Ban co the giu nguyen hoac nang cap no doc state.json neu muon)
